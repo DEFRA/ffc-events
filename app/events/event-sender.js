@@ -6,7 +6,7 @@ const { CompressionTypes } = require('kafkajs')
 class EventSender extends EventBase {
   constructor (config) {
     super(config)
-    this.sendEvent = this.sendEvent.bind(this)
+    this.sendEvents = this.sendEvents.bind(this)
     this.producer = this.kafka.producer()
   }
 
