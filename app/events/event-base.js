@@ -57,8 +57,8 @@ class EventBase {
         mechanism: 'oauthbearer',
         oauthBearerProvider: async () => {
           const credential = new DefaultAzureCredential()
-          const token = await credential.getToken(['https://servicebus.azure.net'])
-          return { value: token }
+          const accessToken = await credential.getToken(['https://servicebus.azure.net'])
+          return { value: accessToken.token }
         }
       }
     }
