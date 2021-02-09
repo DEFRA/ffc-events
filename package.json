@@ -1,0 +1,27 @@
+{
+  "name": "ffc-events",
+  "version": "1.0.0",
+  "description": "Events npm module for FFC services",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DEFRA/ffc-messaging.git"
+  },
+  "author": "Defra DDTS",
+  "contributors": [
+    "John Watson john.watson2@rpa.gov.uk"
+  ],
+  "license": "OGL-UK-3.0",
+  "bugs": {
+    "url": "https://github.com/DEFRA/ffc-messaging/issues"
+  },
+  "homepage": "https://github.com/DEFRA/ffc-messaging#readme",
+  "dependencies": {
+    "@azure/identity": "^1.2.2",
+    "kafkajs": "^1.15.0",
+    "joi": "^17.3.0"
+  },
+  "devDependencies": {
+    "standard": "^16.0.1"
+  }
+}
