@@ -1,6 +1,5 @@
 const EventBase = require('./event-base')
 const eventSchema = require('./event-schema')
-const retry = require('../retry')
 const { trackTrace } = require('../app-insights')
 const { CompressionTypes } = require('kafkajs')
 
@@ -19,7 +18,7 @@ class EventSender extends EventBase {
   async sendEvents (events, options = {}) {
     events = Promise.all(events.map(this.validateAndTransformEvent))
     trackTrace(this.appInsights, this.connectionName)
-    await retry(() => this.send(events, options), this.config.retries, this.config.retryWaitInMs, this.config.exponentialRetry)
+    await this.send(events, options)
     return events
   }
 

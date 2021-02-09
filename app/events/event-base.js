@@ -3,41 +3,64 @@ const { DefaultAzureCredential } = require('@azure/identity')
 
 class EventBase {
   constructor (config) {
-    this.connectionName = config.name
+    this.connectionName = config.name || config.topic
+    this.config = config
     this.appInsights = config.appInsights
     this.topic = config.topic
-    this.config = config
+    this.port = this.getPort(config.port)
     this.connect()
   }
 
   async connect () {
-    const credentials = this.config.usePodIdentity ? await this.getTokenCredentials() : this.getUsernameCredentials()
+    const credentials = this.getCredentials()
     this.kafka = new Kafka({
       logLevel: this.config.logLevel || logLevel.ERROR,
-      brokers: [`${this.config.host}:${this.config.port}`],
+      brokers: [`${this.config.host}:${this.port}`],
       clientId: this.config.clientId,
-      sasl: credentials
+      retry: {
+        initialRetryTime: this.config.retryWaitInMs || 500,
+        retries: this.config.retries || 5
+      },
+      ...credentials
     })
   }
 
-  getTokenCredentials () {
+  getPort (port) {
+    return this.config.authentication === 'token' ? 9093 : port || 9093
+  }
+
+  getCredentials () {
+    switch (this.config.authentication) {
+      case 'password':
+        return this.getPasswordCredentials()
+      case 'token':
+        return this.getTokenCredentials()
+      default:
+        return {}
+    }
+  }
+
+  getPasswordCredentials () {
     return {
-      mechanism: 'oauthbearer',
-      oauthBearerProvider: async () => {
-        const credential = new DefaultAzureCredential()
-        const token = await credential.getToken(['https://servicebus.azure.net'])
-        return {
-          value: token
-        }
+      sasl: {
+        mechanism: this.config.mechanism || 'plain',
+        username: this.config.username,
+        password: this.config.password
       }
     }
   }
 
-  getUsernameCredentials () {
+  getTokenCredentials () {
     return {
-      mechanism: this.config.mechanism || 'plain',
-      username: this.config.username,
-      password: this.config.password
+      ssl: true,
+      sasl: {
+        mechanism: 'oauthbearer',
+        oauthBearerProvider: async () => {
+          const credential = new DefaultAzureCredential()
+          const token = await credential.getToken(['https://servicebus.azure.net'])
+          return { value: token }
+        }
+      }
     }
   }
 }

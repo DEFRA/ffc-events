@@ -12,25 +12,44 @@ npm install --save ffc-events
 
 ### Configuration
 
-`host` - Azure Service Bus namespace, for example, `myservicebus.servicebus.windows.net`
+`name` - name of connection, if not supplied the address name will be used.  This value is also used in App Insights tracing
 
-`useCredentialChain` - Boolean value for whether to authenticate connection with using Azure's credential chain.  For example, set this to true if you wish to use [AAD Pod Identity](https://github.com/Azure/aad-pod-identity).  If `false`, then `username` and `password` are required.
+`host` - Event broker hostname, when using Azure Event Hubs provide the namespace, for example, `myeventhubs.servicebus.windows.net`
 
-`username` - Azure Service Bus Shared Access Key name for authentication.  Not required if `useCredentialChain` is `true`.
+`port` - Event broker port, defaults to `9093` if not supplied.  When using `token` authentication with Azure Event Hubs, value is ignored as that must always be `9093`.
 
-`password` - Azure Service Bus Shared Access Key value for authentication.  Not required if `useCredentialChain` is `true`.
+`authentication` - method to authenticate connection to broker.  
+Allowed values: 
+- `password` for username and password
+- `token` for [AAD Pod Identity](https://github.com/Azure/aad-pod-identity) with Azure Event Hubs.  
 
-`type` - Azure Service Bus entity to connect to, allows `queue`, `topic` or `subscription`.
+If not supplied then no authentication is configured.
 
-`topic` - The name of the topic/event hub to connect to.
+`mechanism` - SASL authentication method.  Only required if `authentication` is `password`.
+Allowed values:
+- `plain` - plain text
+- `scram-sha-512` - scram 512
+- `scram-sha-265` - scram 265
 
-`appInsights` - Application Insights module if logging is required
+If not supplied then `plain` is used
 
-`retries` - How many times should a sender try to send a message, defaulting to `5` if not supplied.  With Pod Identity and Azure Identity there is a scenario that the identity will not be allocated in time for it's usage which causes failure sending messages.  `5` is usually sufficient but can be increased if necessary.
+`username` - Broker SASL username.  Only required if `authentication` is `password`.
 
-`retryWaitInMs` - How long should a sender wait in milliseconds before trying to resend, defaulting to `500` if not supplied.
+`password` - Broker SASL password.  Only required if `authentication` is `password`.
 
-`exponentialRetry` - Whether to exponentially retry, ie doubling the `retryWaitInMs` on every retry.  Defaulted to `false`.
+`topic` - The name of the topic/Event Hub to connect to.
+
+`clientId` - How the client should be identified within the broker.  For example, `ffc-demo-claim-service`
+
+`consumerGroupId` - (Consumer only) The name of the consumer group to join.  For example, `ffc-demo-claim-service`
+
+`fromBeginning` - (Consumer only) Consumers by default will fetch messages from the latest committed offset.  If this value is not defined then `fromBeginning` determines the behaviour of the consumer group.  If `true` the earliest offset is used, if `false` then the latest is used.  If not supplied then `true` is used as default.
+
+`appInsights` - Application Insights module if logging is required.
+
+`retries` - How many times should a sender try to connect to broker, defaulting to `5` if not supplied.  
+
+`retryWaitInMs` - How long should a connection wait in milliseconds before trying to reconnect, defaulting to `500` if not supplied.
 
 #### Example
 
@@ -48,19 +67,17 @@ const config = {
 }
 ```
 
-### Sending a message
+### Sending an event
 
-Message objects must follow the below structure.
+Events objects must follow the below structure.
 
-`body` - The body of the message.
+`body` - The body of the event.
 
 `type` - Type of message using reverse DNS notation. For example, `uk.gov.demo.claim.validated`.
 
 `subject` - Optional, if the body alone is not sufficient to give context to the recipient.  For example, `myImage.jpeg`.
 
-`source` - Name of the service sending the message.  For example, `ffc-demo-claim-service`
-
-`correlationId` - Optional, if distributed tracing through Application Insights is required.
+`source` - Name of the service sending the event.  For example, `ffc-demo-claim-service`
 
 
 #### Example
@@ -132,18 +149,6 @@ It is often beneficial when using this to specify the maximum wait time for both
 messages = await receiver.receiveMessages(batchSize, { maxWaitTimeInMs: 1000, maxTimeAfterFirstMessageInMs: 5000 })
 ```
 
-#### Peek
-Same as `receiveMessages` but does not mark the message as complete so it can still be received by other services once the peek lock expires.
-
-```
-const receiver = new EventReceiver(config, action)
-// receive a maximum of 10 messages
-messages = await receiver.peekMessages(10)
-
-// shutdown when needed
-await receiver.closeConnection()
-```
-
 ### Handling a received message
 Once a message is received through a peek lock, a response must be sent to Azure Service Bus before the lock expires otherwise Service Bus will resend the message.
 
@@ -154,30 +159,6 @@ Message is complete and no further processing needed.
 
 ```
 await receiver.completeMessage(message)
-```
-
-#### Dead Letter
-Message cannot be processed by any client so should be added to dead letter queue.
-
-```
-await receiver.deadLetterMessage(message)
-```
-
-### Abandon
-Abandon processing of current message so it can be redelivered, potentially to another client.
-
-```
-await receiver.abandonMessage(message)
-```
-
-### Defer
-Defer message back to queue for later processing.  It will not be redelivered to any client unless the receiver command supplies the sequence number as an option.
-
-[Further reading on deferring messages](https://docs.microsoft.com/en-gb/azure/service-bus-messaging/message-deferral)
-
-```
-// Defer
-await receiver.deferMessage(message)
 ```
 
 ## Licence
