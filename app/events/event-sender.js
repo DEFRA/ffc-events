@@ -16,7 +16,7 @@ class EventSender extends EventBase {
   }
 
   async sendEvents (events, options = {}) {
-    events = Promise.all(events.map(this.validateAndTransformEvent))
+    events = await Promise.all(events.map(this.validateAndTransformEvent))
     trackTrace(this.appInsights, this.connectionName)
     await this.send(events, options)
     return events
