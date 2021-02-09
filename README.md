@@ -54,16 +54,19 @@ If not supplied then `plain` is used
 #### Example
 
 ```
-const config = {
-  host: 'myeventhubs.servicebus.windows.net',
-  useCredentialChain: false,
-  username: 'mySharedAccessKeyName',
-  password: 'mySharedAccessKey,
-  address: 'mySubscription,
-  type: 'subscription',
-  topic: 'myTopic',
-  appInsights: require('applicationinsights'),
-  retries: 5
+const config {
+  name: 'ffc-demo-collector-claim-update',
+  host: 'localhost',
+  port: 9093,
+  authentication: 'password',
+  username: 'username',
+  password: 'password',
+  mechanism: 'scram-sha-512',
+  topic: 'ffc-demo-claim-update',
+  clientId: 'ffc-demo-collector',
+  consumerGroupId: 'ffc-demo-collector',
+  fromBeginning: true,
+  appInsights: require('applicationinsights')
 }
 ```
 
@@ -83,82 +86,38 @@ Events objects must follow the below structure.
 #### Example
 
 ```
-const message = {
+// Events are sent as an array
+const events = [{
   body: { claimId: 1 },
   type: 'uk.gov.demo.claim.validated',
   subject: 'New Claim',
   source: 'ffc-demo-claim-service'
-}
+}]
 ```
 ```
 const sender = new EventSender(config)
-await sender.sendMessage(message)
+await sender.connect()
+await sender.sendEvents(events)
 
 // shutdown when needed
 await sender.closeConnection()
 ```
 
-The `sendMessage` function can also receive all options applicable to Azure Service Bus `sendMessages` as a parameter, see [Azure documentation](https://www.npmjs.com/package/@azure/service-bus).
+### Consuming events
+
+Permanantely subscribe to all new events from latest offest.  Messages are automatically periodically committed.
 
 ```
-await sender.sendMessage(message, options)
-```
-
-### Receiving a message
-
-There are multiple options for receiving a message.
-
-#### Subscribe
-Permanantely subscribe to all messages.  Automatically will handle any intermittant disconnects.
-
-```
-const action = function (message) {
-  console.log(message.body)
+const action = function (event) {
+  console.log(event.value.toString())
 }
 
 const receiver = new EventReceiver(config, action)
+await receiver.connect()
 await receiver.subscribe()
 
 // shutdown when needed
 await receiver.closeConnection()
-```
-
-#### Receive
-Single call to receive current messages messages.
-
-```
-const receiver = new EventReceiver(config, action)
-// receive a maximum of 10 messages
-messages = await receiver.receiveMessages(10)
-
-// shutdown when needed
-await receiver.closeConnection()
-```
-
-The `receiveMessages` function can also receive all options applicable to Azure Service Bus `receiveMessages` as a parameter, see [Azure documentation](https://www.npmjs.com/package/@azure/service-bus).
-
-```
-await receiver.receiveMessages(10, options)
-```
-
-It is often beneficial when using this to specify the maximum wait time for both the first message and the last message to improve performance of the application.  For example:
-
-```
-// This will wait a maximum of one second for the first message, if no message exists then the response will return.  
-// If a message is received within one second it will wait a further five seconds or until it receives 10 messages to return
-messages = await receiver.receiveMessages(batchSize, { maxWaitTimeInMs: 1000, maxTimeAfterFirstMessageInMs: 5000 })
-```
-
-### Handling a received message
-Once a message is received through a peek lock, a response must be sent to Azure Service Bus before the lock expires otherwise Service Bus will resend the message.
-
-If this is not the intended behaviour there are several responses that can be sent.
-
-#### Complete
-Message is complete and no further processing needed.
-
-```
-await receiver.completeMessage(message)
 ```
 
 ## Licence
