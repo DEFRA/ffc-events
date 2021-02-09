@@ -51,8 +51,10 @@ class EventSender extends EventBase {
     }
   }
 
-  serializeEvent (value) {
-    return JSON.stringify(value)
+  serializeEvent (event) {
+    return {
+      value: JSON.stringify(event)
+    }
   }
 }
 
