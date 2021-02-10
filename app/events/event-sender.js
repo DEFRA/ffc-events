@@ -25,7 +25,7 @@ class EventSender extends EventBase {
   async send (events, options) {
     await this.producer.send({
       topic: this.topic,
-      compression: CompressionTypes.GZIP,
+      compression: CompressionTypes.None,
       messages: events,
       options
     })
