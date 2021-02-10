@@ -25,7 +25,7 @@ class EventBase {
   }
 
   getPort (port) {
-    return this.config.authentication === 'token' ? 9093 : port || 9093
+    return this.config.authentication === 'token' ? 9093 : port
   }
 
   getCredentials () {
