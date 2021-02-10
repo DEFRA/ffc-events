@@ -7,6 +7,7 @@ class EventSender extends EventBase {
   constructor (config) {
     super(config)
     this.sendEvents = this.sendEvents.bind(this)
+    this.validateAndTransformEvent = this.validateAndTransformEvent.bind(this)
     this.enrichEvent = this.enrichEvent.bind(this)
     this.serializeEvent = this.serializeEvent.bind(this)
   }
