@@ -7,11 +7,11 @@ class EventSender extends EventBase {
   constructor (config) {
     super(config)
     this.sendEvents = this.sendEvents.bind(this)
-    this.producer = this.kafka.producer()
   }
 
   async connect () {
     await super.connect()
+    this.producer = this.kafka.producer()
     await this.producer.connect()
   }
 

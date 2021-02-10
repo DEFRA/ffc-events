@@ -6,11 +6,11 @@ class EventReceiver extends EventBase {
     super(config)
     this.receiverHandler = this.receiverHandler.bind(this)
     this.action = action
-    this.consumer = this.kafka.consumer({ groupId: this.config.consumerGroupId })
   }
 
   async connect () {
     await super.connect()
+    this.consumer = this.kafka.consumer({ groupId: this.config.consumerGroupId })
     await this.consumer.connect()
   }
 
