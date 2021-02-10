@@ -82,6 +82,8 @@ Events objects must follow the below structure.
 
 `source` - Name of the service sending the event.  For example, `ffc-demo-claim-service`
 
+`headers` - Optional, key value pair object of any metadata to be attached to the event.
+
 
 #### Example
 

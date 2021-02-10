@@ -18,19 +18,18 @@ class EventSender extends EventBase {
     await this.producer.connect()
   }
 
-  async sendEvents (events, options = {}) {
+  async sendEvents (events) {
     events = await Promise.all(events.map(this.validateAndTransformEvent))
     trackTrace(this.appInsights, this.connectionName)
-    await this.send(events, options)
+    await this.send(events)
     return events
   }
 
-  async send (events, options) {
+  async send (events) {
     await this.producer.send({
       topic: this.topic,
       compression: CompressionTypes.None,
-      messages: events,
-      options
+      messages: events
     })
   }
 
@@ -40,8 +39,9 @@ class EventSender extends EventBase {
 
   async validateAndTransformEvent (event) {
     await eventSchema.validateAsync(event)
+    const headers = event.headers
     event = this.enrichEvent(event)
-    event = this.serializeEvent(event)
+    event = this.serializeEvent(event, headers)
     return event
   }
 
@@ -54,8 +54,9 @@ class EventSender extends EventBase {
     }
   }
 
-  serializeEvent (event) {
+  serializeEvent (event, headers = {}) {
     return {
+      headers,
       value: JSON.stringify(event)
     }
   }
