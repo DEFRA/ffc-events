@@ -5,6 +5,7 @@ class EventReceiver extends EventBase {
   constructor (config, action) {
     super(config)
     this.receiverHandler = this.receiverHandler.bind(this)
+    this.routingKeyIsValid = this.routingKeyIsValid.bind(this)
     this.action = action
   }
 
@@ -22,12 +23,22 @@ class EventReceiver extends EventBase {
     await this.consumer.run({
       eachMessage: async ({ topic, partition, message }) => {
         try {
-          await this.receiverHandler(message)
+          if (!this.routingKey || this.routingKeyIsValid(message)) {
+            await this.receiverHandler(message)
+          }
         } catch (err) {
           this.receiverError(err)
         }
       }
     })
+  }
+
+  routingKeyIsValid (message) {
+    if (message.headers.routingKey) {
+      const keyValue = message.headers.routingKey.toString()
+      return keyValue === this.routingKey
+    }
+    return true
   }
 
   receiverError (err) {

@@ -8,6 +8,7 @@ class EventBase {
     this.appInsights = config.appInsights
     this.topic = config.topic
     this.port = this.getPort(config.port)
+    this.routingKey = config.routingKey
   }
 
   async connect () {
