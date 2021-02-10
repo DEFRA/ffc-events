@@ -51,7 +51,7 @@ If not supplied then `plain` is used
 
 `retryWaitInMs` - How long should a connection wait in milliseconds before trying to reconnect, defaulting to `500` if not supplied.
 
-`routingKey` - If a routing key us supplied then any events not matching the key will be automatically discarded.
+`routingKey` - If a routing key is supplied then any events not matching the key will be automatically discarded.
 
 #### Example
 
