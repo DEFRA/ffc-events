@@ -11,7 +11,10 @@ class EventReceiver extends EventBase {
 
   async connect () {
     await super.connect()
-    this.consumer = this.kafka.consumer({ groupId: this.config.consumerGroupId })
+    this.consumer = this.kafka.consumer({
+      groupId: this.config.consumerGroupId,
+      metadataMaxAge: 180000
+    })
     await this.consumer.connect()
   }
 
