@@ -58,7 +58,7 @@ class EventBase {
       sasl: {
         mechanism: 'oauthbearer',
         oauthBearerProvider: async () => {
-          const accessToken = await retry(() => this.getToken, this.config.retries, this.config.retryWaitInMs, false)
+          const accessToken = await retry(() => this.getToken(), this.config.retries, this.config.retryWaitInMs, false)
           return { value: accessToken.token }
         }
       }
