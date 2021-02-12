@@ -1,5 +1,6 @@
 const { Kafka, logLevel } = require('kafkajs')
 const { DefaultAzureCredential } = require('@azure/identity')
+const retry = require('../retry')
 
 class EventBase {
   constructor (config) {
@@ -9,14 +10,10 @@ class EventBase {
     this.topic = config.topic
     this.port = this.getPort(config.port)
     this.routingKey = config.routingKey
-    this.getCredentials = this.getCredentials.bind(this)
-    this.getTokenCredentials = this.getTokenCredentials.bind(this)
-    this.getPasswordCredentials = this.getPasswordCredentials.bind(this)
   }
 
   async connect () {
-    const credentials = await this.getCredentials()
-    console.log('Credentials:', credentials)
+    const credentials = this.getCredentials()
     this.kafka = new Kafka({
       logLevel: this.config.logLevel || logLevel.ERROR,
       brokers: [`${this.config.host}:${this.port}`],
@@ -34,12 +31,12 @@ class EventBase {
     return this.config.authentication === 'token' ? 9093 : port
   }
 
-  async getCredentials () {
+  getCredentials () {
     switch (this.config.authentication) {
       case 'password':
         return this.getPasswordCredentials()
       case 'token':
-        return await this.getTokenCredentials()
+        return this.getTokenCredentials()
       default:
         return {}
     }
@@ -61,12 +58,16 @@ class EventBase {
       sasl: {
         mechanism: 'oauthbearer',
         oauthBearerProvider: async () => {
-          const credential = new DefaultAzureCredential()
-          const accessToken = await credential.getToken([`https://${this.config.host}.servicebus.windows.net`])
+          const accessToken = await retry(() => this.getToken, this.config.retries, this.config.retryWaitInMs, false)
           return { value: accessToken.token }
         }
       }
     }
+  }
+
+  async getToken () {
+    const credential = new DefaultAzureCredential()
+    return await credential.getToken([`https://${this.config.host}.servicebus.windows.net`])
   }
 }
 
