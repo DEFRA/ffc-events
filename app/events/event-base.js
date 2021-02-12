@@ -56,7 +56,7 @@ class EventBase {
     }
   }
 
-  getTokenCredentials () {
+  async getTokenCredentials () {
     return {
       ssl: true,
       sasl: {
