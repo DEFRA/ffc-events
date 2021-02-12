@@ -9,15 +9,11 @@ class EventBase {
     this.topic = config.topic
     this.port = this.getPort(config.port)
     this.routingKey = config.routingKey
-    console.log('Connect:', config)
-    console.log('Topic:', config.topic)
-    console.log('Port:', this.port)
-    console.log('Routing key:', this.routingKey)
   }
 
   async connect () {
     const credentials = await this.getCredentials()
-    console.log('Credentials:', this.credentials)
+    console.log('Credentials:', credentials)
     this.kafka = new Kafka({
       logLevel: this.config.logLevel || logLevel.ERROR,
       brokers: [`${this.config.host}:${this.port}`],
