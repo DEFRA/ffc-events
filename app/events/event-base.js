@@ -9,6 +9,9 @@ class EventBase {
     this.topic = config.topic
     this.port = this.getPort(config.port)
     this.routingKey = config.routingKey
+    this.getCredentials = this.getCredentials.bind(this)
+    this.getTokenCredentials = this.getTokenCredentials.bind(this)
+    this.getPasswordCredentials = this.getPasswordCredentials.bind(this)
   }
 
   async connect () {
@@ -59,9 +62,7 @@ class EventBase {
         mechanism: 'oauthbearer',
         oauthBearerProvider: async () => {
           const credential = new DefaultAzureCredential()
-          console.log('Identity Credential:', credential)
-          const accessToken = await credential.getToken(['https://eventhubs.azure.net'])
-          console.log('Token:', accessToken)
+          const accessToken = await credential.getToken([`https://${this.config.host}.servicebus.windows.net`])
           return { value: accessToken.token }
         }
       }
