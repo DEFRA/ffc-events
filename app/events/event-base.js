@@ -9,10 +9,15 @@ class EventBase {
     this.topic = config.topic
     this.port = this.getPort(config.port)
     this.routingKey = config.routingKey
+    console.log('Connect:', config)
+    console.log('Topic:', config.token)
+    console.log('Port:', this.port)
+    console.log('Routing key:', this.routingKey)
   }
 
   async connect () {
     const credentials = this.getCredentials()
+    console.log('Credentials:', this.credentials)
     this.kafka = new Kafka({
       logLevel: this.config.logLevel || logLevel.ERROR,
       brokers: [`${this.config.host}:${this.port}`],
@@ -23,6 +28,7 @@ class EventBase {
       },
       ...credentials
     })
+    console.log('Kafka:', this.kafka)
   }
 
   getPort (port) {
@@ -57,7 +63,9 @@ class EventBase {
         mechanism: 'oauthbearer',
         oauthBearerProvider: async () => {
           const credential = new DefaultAzureCredential()
+          console.log('Identity Credential:', credential)
           const accessToken = await credential.getToken(['https://eventhubs.azure.net'])
+          console.log('Token:', accessToken)
           return { value: accessToken.token }
         }
       }
