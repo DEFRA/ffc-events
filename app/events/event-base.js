@@ -35,12 +35,12 @@ class EventBase {
     return this.config.authentication === 'token' ? 9093 : port
   }
 
-  getCredentials () {
+  async getCredentials () {
     switch (this.config.authentication) {
       case 'password':
         return this.getPasswordCredentials()
       case 'token':
-        return this.getTokenCredentials()
+        return await this.getTokenCredentials()
       default:
         return {}
     }
