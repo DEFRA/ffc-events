@@ -10,6 +10,7 @@ class EventBase {
     this.topic = config.topic
     this.port = this.getPort(config.port)
     this.routingKey = config.routingKey
+    this.getToken = this.getToken.bind(this)
   }
 
   async connect () {
@@ -24,21 +25,33 @@ class EventBase {
       },
       ...credentials
     })
-    console.log('Kafka:', this.kafka)
   }
 
   getPort (port) {
-    return this.config.authentication === 'token' ? 9093 : port
+    return (this.config.authentication === 'token' || this.config.authentication === 'connectionString') ? 9093 : port
   }
 
   getCredentials () {
     switch (this.config.authentication) {
+      case 'connectionString':
+        return this.getConnectionStringCredentials()
       case 'password':
         return this.getPasswordCredentials()
       case 'token':
         return this.getTokenCredentials()
       default:
         return {}
+    }
+  }
+
+  getConnectionStringCredentials () {
+    return {
+      ssl: true,
+      sasl: {
+        mechanism: 'plain',
+        username: '$ConnectionString',
+        password: this.config.connectionString
+      }
     }
   }
 
@@ -52,14 +65,16 @@ class EventBase {
     }
   }
 
-  async getTokenCredentials () {
+  getTokenCredentials () {
     return {
       ssl: true,
       sasl: {
         mechanism: 'oauthbearer',
         oauthBearerProvider: async () => {
-          const accessToken = await retry(() => this.getToken(), this.config.retries, this.config.retryWaitInMs, false)
-          return { value: accessToken.token }
+          const accessToken = await retry(() => this.getToken(), 10, 1000, true)
+          return {
+            value: accessToken.token
+          }
         }
       }
     }
@@ -67,7 +82,7 @@ class EventBase {
 
   async getToken () {
     const credential = new DefaultAzureCredential()
-    return await credential.getToken([`https://${this.config.host}.servicebus.windows.net`])
+    return await credential.getToken([`https://${this.config.host}`])
   }
 }
 

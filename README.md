@@ -16,12 +16,13 @@ npm install --save ffc-events
 
 `host` - Event broker hostname, when using Azure Event Hubs provide the namespace, for example, `myeventhubs.servicebus.windows.net`
 
-`port` - Event broker port, defaults to `9093` if not supplied.  When using `token` authentication with Azure Event Hubs, value is ignored as that must always be `9093`.
+`port` - Event broker port, defaults to `9093` if not supplied.  When using `token` or `connectionString` authentication with Azure Event Hubs, value is ignored as that must always be `9093`.
 
 `authentication` - method to authenticate connection to broker.  
 Allowed values: 
 - `password` for username and password
-- `token` for [AAD Pod Identity](https://github.com/Azure/aad-pod-identity) with Azure Event Hubs.  
+- `connectionString` for Azure Event Hubs only
+- `token` for [AAD Pod Identity](https://github.com/Azure/aad-pod-identity) with Azure Event Hubs
 
 If not supplied then no authentication is configured.
 
@@ -36,6 +37,8 @@ If not supplied then `plain` is used
 `username` - Broker SASL username.  Only required if `authentication` is `password`.
 
 `password` - Broker SASL password.  Only required if `authentication` is `password`.
+
+`connectionString` - Connection String.  Only required if `authentication` is `connectionString`.
 
 `topic` - The name of the topic/Event Hub to connect to.
 
