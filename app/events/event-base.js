@@ -23,6 +23,7 @@ class EventBase {
         initialRetryTime: this.config.retryWaitInMs || 500,
         retries: this.config.retries || 5
       },
+      authenticationTimeout: 60000,
       ...credentials
     })
   }
