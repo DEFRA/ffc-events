@@ -41,7 +41,7 @@ class EventReceiver extends EventBase {
       const keyValue = message.headers.routingKey.toString()
       return keyValue === this.routingKey
     }
-    return true
+    return false
   }
 
   receiverError (err) {
