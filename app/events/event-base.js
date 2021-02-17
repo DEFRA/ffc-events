@@ -16,7 +16,7 @@ class EventBase {
   async connect () {
     const credentials = this.getCredentials()
     this.kafka = new Kafka({
-      logLevel: this.config.logLevel || logLevel.ERROR,
+      logLevel: this.config.logLevel || logLevel.NOTHING,
       brokers: [`${this.config.host}:${this.port}`],
       clientId: this.config.clientId,
       retry: {
