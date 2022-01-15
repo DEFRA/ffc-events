@@ -1,6 +1,6 @@
 {
   "name": "ffc-events",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Events npm module for FFC services",
   "main": "index.js",
   "repository": {
