@@ -1,6 +1,6 @@
 {
   "name": "ffc-events",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Events npm module for FFC services",
   "main": "index.js",
   "repository": {
@@ -17,11 +17,11 @@
   },
   "homepage": "https://github.com/DEFRA/ffc-messaging#readme",
   "dependencies": {
-    "@azure/identity": "^1.2.2",
-    "kafkajs": "^1.15.0",
-    "joi": "^17.3.0"
+    "@azure/identity": "3.0.0",
+    "kafkajs": "1.16.0",
+    "joi": "17.6.4"
   },
   "devDependencies": {
-    "standard": "^16.0.1"
+    "standard": "17.0.0"
   }
 }
