@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/DEFRA/ffc-messaging#readme",
   "dependencies": {
-    "@azure/identity": "3.0.0",
+    "@azure/identity": "3.2.3",
     "kafkajs": "1.16.0",
     "joi": "17.6.4"
   },
